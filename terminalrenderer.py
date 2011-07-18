@@ -2,10 +2,12 @@
 class TerminalRenderer(object):
 
     def __init__(self):
+        self.log = open("termdata.log", "w")
         pass
 
     def render(self, object):
         "Takes either a string or action tuple and renders it"
+        print >>self.log, object,
         if type(object) is str:
             return self.printString(object)
         else:
