@@ -1,33 +1,12 @@
 import sys
 import time
 import struct
-
-class BaseTerminal(object):
-
-    def __init__(self):
-        self.t0 = int(time.time() * 100000)
-
-    def delay(self, delaytime):
-        "Delay until relative time in seconds since start is less than the passed value"
-        delaytime = struct.unpack("I", delaytime)[0]
-        resumeTime = self.t0 + delaytime
-        print >>sys.stderr, "x%x" % resumeTime
-        while int(time.time() * 1000) < resumeTime:
-            pass
-
-    def render(self, object):
-        "Takes either a string or action tuple and renders it"
-        if type(object) is str:
-            return self.printString(object)
-        else:
-            print >>self.log, object
-            return getattr(self, object[0])(*object[1:])
+from baseterminal import BaseTerminal
 
 class TerminalRenderer(BaseTerminal):
 
     def __init__(self):
         super(TerminalRenderer, self).__init__()
-        self.log = open("termdata.log", "w")
 
     def printString(self, string):
         return string

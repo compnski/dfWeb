@@ -3,6 +3,8 @@ import time
 import struct
 import string
 import sys
+from baseterminal import BaseTerminal, NotImplementedError
+
 from data import *
 
 
@@ -44,6 +46,7 @@ class Cursor(object):
         return ret
 
 
+
     def _getNewChar(self, r, c, char):
         "Return a new Char() object with the current mode and specified character"
         return self.parent._getNewChar(r, c, char)
@@ -68,14 +71,17 @@ class Cursor(object):
             if not attr:
                 attr = 0
             attr = int(attr)
-            if attr == 0:
-                self.attrs = self._defaultAttrs()
-            elif attr < 3:
-                self.attrs['brightness'] = brightnessMap[attr]
-            elif attr < 40:
-                self.attrs['fgColor'] = colorMap[attr-30]
-            else:
-                self.attrs['bgColor'] = colorMap[attr-40]
+            try:
+                if attr == 0:
+                    self.attrs = self._defaultAttrs()
+                elif attr < 3:
+                    self.attrs['brightness'] = brightnessMap[attr]
+                elif attr < 40:
+                    self.attrs['fgColor'] = colorMap[attr-30]
+                else:
+                    self.attrs['bgColor'] = colorMap[attr-40]
+            except KeyError:
+                raise NotImplementedError('setRendition', *args)
 
     def setExpandedMode(self, mode):
         pass
@@ -86,32 +92,14 @@ class Cursor(object):
         return dict(bgColor=(0, 0, 0), fgColor=(255, 255, 255))
 
 
-class Terminal(object):
-
-    def render(self, object):
-        "Takes either a string or action tuple and renders it"
-        if type(object) is str:
-            self.printString(object)
-        else:
-            args = []
-            for n in object[1:]:
-                args.extend(n.split(";"))
-            getattr(self, object[0])(*args)
-            return object
+class Terminal(BaseTerminal):
 
     def __init__(self, charFactory, r, c):
+        super(TerminalRenderer, self).__init__()
         self.r = r
         self.c = c
         self.cursor = Cursor(self)
         self.charFactory = charFactory
-        self.t0 = int(time.time() * 100000)
-
-    def delay(self, delaytime):
-        "Delay until relative time in seconds since start is less than the passed value"
-        delaytime = struct.unpack("I", delaytime)[0]
-        resumeTime = self.t0 + delaytime
-        while int(time.time() * 100000) < resumeTime:
-            pass
 
     def setDisplay(self, display):
         self.display = display
