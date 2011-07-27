@@ -4,13 +4,14 @@ import time
 class BaseError(Error):pass
 class NotImplementedError(BaseError):
     def __init__(self, functionName, *funtionArgs):
-        super(NotImplementedError, self).__init__("%s(%s)" % (functionName, ", ".join(funtionArg))
+        super(NotImplementedError, self).__init__("%s(%s)" % (functionName, ", ".join(funtionArg)))
 
 class BaseTerminal(object):
 
     def __init__(self):
         #self.log = open("termdata.log", "w")
         self.t0 = int(time.time())
+        self.notImplLog = open("notImplLog.txt", "w")
 
     def delay(self, delaytime):
         "Delay until relative time in seconds since start is less than the passed value"
@@ -33,4 +34,5 @@ class BaseTerminal(object):
                 args.extend(n.split(";"))
             #print >>self.log, object
             getattr(self, object[0])(*args)
-        except 
+        except NotImplementedError as e:
+            print >>self.notImplLog, str(e)
