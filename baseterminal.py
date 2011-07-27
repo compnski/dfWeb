@@ -1,8 +1,8 @@
 import sys
 import time
 
-class BaseError(Error):pass
-class NotImplementedError(BaseError):
+class Error(BaseException):pass
+class NotImplementedError(Error):
     def __init__(self, functionName, *funtionArgs):
         super(NotImplementedError, self).__init__("%s(%s)" % (functionName, ", ".join(funtionArg)))
 
@@ -29,10 +29,10 @@ class BaseTerminal(object):
             if type(object) is str:
                 return self.printString(object)
             else:
-            args = []
-            for n in object[1:]:
-                args.extend(n.split(";"))
+                args = []
+                for n in object[1:]:
+                    args.extend(n.split(";"))
             #print >>self.log, object
-            getattr(self, object[0])(*args)
+                getattr(self, object[0])(*args)
         except NotImplementedError as e:
             print >>self.notImplLog, str(e)

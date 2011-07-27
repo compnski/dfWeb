@@ -95,7 +95,7 @@ class Cursor(object):
 class Terminal(BaseTerminal):
 
     def __init__(self, charFactory, r, c):
-        super(TerminalRenderer, self).__init__()
+        super(Terminal, self).__init__()
         self.r = r
         self.c = c
         self.cursor = Cursor(self)
