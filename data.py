@@ -1,6 +1,33 @@
+import pygame
+
+
+brightnessMap = {1:'bold',
+                 2:'dim'
+                 }
+
+black = pygame.Color('black')
+red = pygame.Color('red')
+green = pygame.Color('green')
+yellow = pygame.Color('yellow')
+green = pygame.Color('green')
+blue = pygame.Color('blue')
+magenta = pygame.Color('magenta')
+cyan = pygame.Color('cyan')
+white = pygame.Color('white')
+
+colorMap = {0:(black.r, black.g, black.b),
+            1:(red.r, red.g, red.b),
+            2:(green.r, green.b, green.g),
+            3:(yellow.r, yellow.b, yellow.g),
+            4:(blue.r, blue.b, blue.g),
+            5:(magenta.r, magenta.b, magenta.g),
+            6:(cyan.r, cyan.b, cyan.g),
+            7:(white.r, white.b, white.g)
+            }
 
 escape_code_map = {
     # GFX sets
+    "esc D *X" : ("delay",),
     "esc ( A" : ("switchCharset", "UK-g0"),
     "esc ) A" : ("switchCharset", "UK-g1"),
     "esc ( B" : ("switchCharset", "ASCII-g0"),
@@ -36,8 +63,8 @@ escape_code_map = {
     "esc [ H" : ("setCursorPos",),
     "esc [ f" : ("setCursorPos",),
 
-    "esc D" : ("index",),
-    "esc M" : ("reverseIndex",),
+    "esc D" : ("scrollUp",),
+    "esc M" : ("scrollDown",),
     "esc E" : ("nextLine",),
 
     "esc 7" : ("saveCursor",),

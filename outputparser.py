@@ -3,6 +3,9 @@ from collections import defaultdict
 import sys
 import os
 import multiprocessing
+
+FLUSH_COMMAND = "\x1bF"
+
 class OutputParserServer(object):
 
     def __init__(self, escape_code_map):
@@ -14,7 +17,7 @@ class OutputParserServer(object):
 
     def getPipes(self):
         "Returns a tuple of outPipe, inPipe. Caller writes to outPipe, reads from inPipe"
-        return self.charPipe_w, self.commandPipe
+        return self.charPipe_w, self.charPipe #commandPipe
 
     def start(self):
         self.process = multiprocessing.Process(target=self._run, name="OutputParserServer",
@@ -38,7 +41,6 @@ class OutputParserServer(object):
     def _run(self, charPipe, commandPipe):
         try:
             while True:
-                #char = charPipe.read()
                 char = os.read(charPipe, 1)
                 if char == "\d":
                     return
@@ -56,7 +58,7 @@ class OutputParserServer(object):
 
 class OutputParser(object):
 
-    MAX_SEQUENCE = 10
+    MAX_SEQUENCE = 15
     def __init__(self):
         self.regexList = []
         self.buf = []
@@ -69,7 +71,7 @@ class OutputParser(object):
 
     def addEscapeCode(self, key, meaningTuple):
         regex = self.escapeCodeToRegex(key)
-        regex = r"^%s([^\x1b]*)$" % regex
+        regex = r"^%s(.*)$" % regex
         pattern = re.compile(regex)
         self.regexList.append((pattern, meaningTuple))
 
@@ -77,14 +79,15 @@ class OutputParser(object):
         if char is None:
             b = self.buf
             self.buf = []
+            self.seqLen = 0
             return self.match("".join(b))
 
         self.seqLen += 1
         if self.buf and (char == "\x1b" or self.seqLen > OutputParser.MAX_SEQUENCE):
+            self.seqLen = 0
             b = self.buf
             self.buf = [char]
             if b[0] != "\x1b":
-                self.seqLen = 0
                 return "".join(b), ""
             match = self.match("".join(b))
             #self.logStats(match)
@@ -102,6 +105,8 @@ class OutputParser(object):
 #         return match
 
     def match(self, buf):
+        if buf in (FLUSH_COMMAND, "\x1b(B"): #dump switch-charset cmds
+            return None
         for (pattern, actionTuple) in self.regexList:
             matcher = pattern.match(buf)
             if matcher is not None:
@@ -112,7 +117,7 @@ class OutputParser(object):
         self.undecodedMap[buf] += 1
 
     def escapeCodeToRegex(self, code):
-        STAR_SECTION = r"((?:\d+;?)*)"
+        STAR_SECTION = r"((?:\d*;?)*)"
         codeParts = code.split(" ")
         patternBuf = []
         for char in codeParts:
@@ -124,7 +129,8 @@ class OutputParser(object):
                 patternBuf.append(STAR_SECTION)
             elif char == "**":
                 patternBuf.append(r"(\d*)")
-
+            elif char == "*X":
+                patternBuf.append("([^\x1b]{4})")
             else:
                 patternBuf.append(re.escape(char))
         return "".join(patternBuf);
