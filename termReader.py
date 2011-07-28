@@ -11,7 +11,7 @@ import termModel
 #def __init__(self, glyphManager, gfxTerm, charGroup):
 
 t = None
-gfx = False
+gfx = True
 g = None
 if gfx:
     glyphManager = GlyphManager()
@@ -26,13 +26,14 @@ else:
     import terminalrenderer
     t = terminalrenderer.TerminalRenderer()
 
-with open("f.log") as f:
-    while f:
-        char = f.read(1)
-        ret = outputParser.parseChar(char)
-        if ret is not None:
-            r = t.render(ret[0])
-            r = t.render(ret[1])
-            if g:
-                g.sink()
+data = open("f.log").read()
+for char in data:
+    ret = outputParser.parseChar(char)
+    if ret is not None:
+        for cmd in ret:
+            disp = t.render(cmd)
+            if disp is not None:
+                sys.stdout.write(disp)
+        if g:
+            g.sink()
 

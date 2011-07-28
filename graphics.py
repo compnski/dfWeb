@@ -11,7 +11,7 @@ class GlyphManager(object):
     def loadSprite(self, spriteFile, glyphHeight, glyphWidth):
 
         self.spriteImg = pygame.image.load(spriteFile)
-        print self.spriteImg.get_palette()
+
         self.glyphWidth = glyphWidth
         self.glyphHeight = glyphHeight
         self.maxCol = self.spriteImg.get_width() / glyphWidth

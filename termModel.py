@@ -60,6 +60,7 @@ class Cursor(object):
         if r  >= self.maxR:
             r = self.maxR - 1
             self.parent.scrollUp(1)
+        print r,c
         return r, c
 
     def setMode(self, mode):
@@ -128,10 +129,19 @@ class Terminal(BaseTerminal):
         return self._blankLines(0, r)
 
     def setChar(self, r, c, char):
-        char_ = self.termBuf[r][c]
-        if char_:
-            char_.remove(self.charFactory.charGroup)
-        self.termBuf[r][c] = char
+        try:
+            char_ = self.termBuf[r][c]
+            if char_:
+                char_.remove(self.charFactory.charGroup)
+            self.termBuf[r][c] = char
+        except IndexError:
+            print "Index out of bounds: setChar(%d, %d, %s)" % (r, c, char)
+            for row in self.termBuf:
+                print "".join(map(str,row))
+            print len(self.termBuf), len(self.termBuf[0])
+            raise
+
+
 
     def getChar(self, r, c):
         return self.termBuf[r][c]
@@ -244,6 +254,8 @@ class Terminal(BaseTerminal):
             self.setCursorPos(0, 0)
 
     def eraseInLine(self, args='0'):
+        if not args:
+            args = 0
         args = int(args)
         if args == 0:
             self.printString(blankString(self.c - self.cursor.c))
